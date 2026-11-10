@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="D3" targetNamespace="http://example.com/t2" name="Travel booking">
+  <error id="Err_1" name="Booking failed" errorCode="E1"/>
+  <process id="P_Travel" name="Book trip" isExecutable="false">
+    <startEvent id="s" name="Trip requested"/>
+    <subProcess id="SP_Book" name="Book travel">
+      <startEvent id="bs"/>
+      <task id="bf" name="Book flight"/>
+      <parallelGateway id="bg1"/>
+      <task id="bh" name="Book hotel"/>
+      <task id="bc" name="Book car"/>
+      <parallelGateway id="bg2"/>
+      <endEvent id="be"/>
+      <sequenceFlow id="b1" sourceRef="bs" targetRef="bf"/>
+      <sequenceFlow id="b2" sourceRef="bf" targetRef="bg1"/>
+      <sequenceFlow id="b3" sourceRef="bg1" targetRef="bh"/>
+      <sequenceFlow id="b4" sourceRef="bg1" targetRef="bc"/>
+      <sequenceFlow id="b5" sourceRef="bh" targetRef="bg2"/>
+      <sequenceFlow id="b6" sourceRef="bc" targetRef="bg2"/>
+      <sequenceFlow id="b7" sourceRef="bg2" targetRef="be"/>
+      <subProcess id="ESP" name="Handle price change" triggeredByEvent="true">
+        <startEvent id="es" name="Price changed" isInterrupting="false"><signalEventDefinition/></startEvent>
+        <task id="et" name="Notify traveller"/>
+        <endEvent id="ee"/>
+        <sequenceFlow id="e1" sourceRef="es" targetRef="et"/>
+        <sequenceFlow id="e2" sourceRef="et" targetRef="ee"/>
+      </subProcess>
+    </subProcess>
+    <boundaryEvent id="bnd" name="Booking failed" attachedToRef="SP_Book"><errorEventDefinition errorRef="Err_1"/></boundaryEvent>
+    <userTask id="Fix" name="Fix booking manually"/>
+    <task id="Pay" name="Charge credit card"><multiInstanceLoopCharacteristics isSequential="true"/></task>
+    <callActivity id="CA" name="Send itinerary" calledElement="P_Itin"/>
+    <exclusiveGateway id="x" name="Paid?" default="fno"/>
+    <endEvent id="ok" name="Trip booked"/>
+    <endEvent id="fail" name="Trip cancelled"><terminateEventDefinition/></endEvent>
+    <sequenceFlow id="f1" sourceRef="s" targetRef="SP_Book"/>
+    <sequenceFlow id="f2" sourceRef="SP_Book" targetRef="Pay"/>
+    <sequenceFlow id="f3" sourceRef="Pay" targetRef="x"/>
+    <sequenceFlow id="fyes" name="yes" sourceRef="x" targetRef="CA"><conditionExpression>paid</conditionExpression></sequenceFlow>
+    <sequenceFlow id="fno" name="no" sourceRef="x" targetRef="fail"/>
+    <sequenceFlow id="f4" sourceRef="CA" targetRef="ok"/>
+    <sequenceFlow id="f5" sourceRef="bnd" targetRef="Fix"/>
+    <sequenceFlow id="f6" sourceRef="Fix" targetRef="Pay"/>
+  </process>
+  <process id="P_Itin" name="Itinerary delivery">
+    <startEvent id="is"/><task id="it" name="Compile itinerary"/><endEvent id="ie" name="Itinerary sent"/>
+    <sequenceFlow id="i1" sourceRef="is" targetRef="it"/><sequenceFlow id="i2" sourceRef="it" targetRef="ie"/>
+  </process>
+</definitions>

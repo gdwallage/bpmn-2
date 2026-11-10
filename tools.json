@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "tools": [
+    {
+      "name": "bpmn_render",
+      "description": "Normalises, validates against OMG BPMN 2.0.2 XSD and structural rules, calculates layout, and generates PNG, SVG, and DI-complete BPMN XML.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "description": "Path to input .bpmn XML file" },
+          "output": { "type": "string", "description": "Base path for output files (without extension)" },
+          "formats": { "type": "string", "default": "png,svg,bpmn", "description": "Comma-separated list of formats (png,svg,bpmn)" },
+          "soundness": { "type": "boolean", "default": true, "description": "Enable token-game deadlock and synchronization validation" },
+          "level": { "type": "string", "enum": ["descriptive", "analytic", "executable", "full"], "default": "analytic" },
+          "subprocess": { "type": "string", "enum": ["auto", "expanded", "collapsed"], "default": "collapsed" },
+          "scale": { "type": "number", "default": 2.0, "description": "Raster scale factor for PNG export" }
+        },
+        "required": ["file", "output"]
+      }
+    },
+    {
+      "name": "bpmn_validate",
+      "description": "Validates a BPMN 2.0 model against official OMG XSD schemas, specification rules, and token soundness.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "description": "Path to the .bpmn file to validate" },
+          "level": { "type": "string", "enum": ["descriptive", "analytic", "executable", "full"] },
+          "soundness": { "type": "boolean", "default": true },
+          "json": { "type": "boolean", "default": true }
+        },
+        "required": ["file"]
+      }
+    },
+    {
+      "name": "bpmn_normalize",
+      "description": "Repairs XML ordering, missing namespaces, and schema element sequences deterministically.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "description": "Source .bpmn file" },
+          "output": { "type": "string", "description": "Path to output normalised .bpmn file" }
+        },
+        "required": ["file", "output"]
+      }
+    },
+    {
+      "name": "bpmn_info",
+      "description": "Extracts process hierarchy, participant inventory, and minimum conformance sub-class.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file": { "type": "string", "description": "Path to the .bpmn file" }
+        },
+        "required": ["file"]
+      }
+    }
+  ]
+}

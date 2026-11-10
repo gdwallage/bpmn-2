@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="D4" targetNamespace="http://example.com/t3">
+  <message id="M1" name="Order"/><message id="M2" name="Invoice"/>
+  <choreography id="Chor_1" name="Purchase choreography">
+    <participant id="PBuyer" name="Buyer"/><participant id="PSeller" name="Seller"/>
+    <messageFlow id="mfo" name="Order" sourceRef="PBuyer" targetRef="PSeller" messageRef="M1"/>
+    <messageFlow id="mfi" name="Invoice" sourceRef="PSeller" targetRef="PBuyer" messageRef="M2"/>
+    <startEvent id="cs" name="Need identified"/>
+    <choreographyTask id="CT1" name="Place order" initiatingParticipantRef="PBuyer">
+      <participantRef>PBuyer</participantRef><participantRef>PSeller</participantRef><messageFlowRef>mfo</messageFlowRef>
+    </choreographyTask>
+    <choreographyTask id="CT2" name="Send invoice" initiatingParticipantRef="PSeller">
+      <participantRef>PSeller</participantRef><participantRef>PBuyer</participantRef><messageFlowRef>mfi</messageFlowRef>
+    </choreographyTask>
+    <endEvent id="ce" name="Order settled"/>
+    <sequenceFlow id="c1" sourceRef="cs" targetRef="CT1"/><sequenceFlow id="c2" sourceRef="CT1" targetRef="CT2"/><sequenceFlow id="c3" sourceRef="CT2" targetRef="ce"/>
+  </choreography>
+</definitions>

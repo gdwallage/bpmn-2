@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Defs_Order" targetNamespace="http://example.com/bpmn/order-to-cash" name="Order to cash" exporter="BPMN 2.0 Standard Skill" exporterVersion="1.0">
+  <dataStore id="DS_ERP_Def" name="ERP"/>
+  <message id="Msg_Order" name="Order"/>
+  <message id="Msg_Rejection" name="Rejection notice"/>
+  <message id="Msg_Payment" name="Payment"/>
+  <message id="Msg_Reminder" name="Payment reminder"/>
+  <message id="Msg_Shipment" name="Shipment"/>
+  <collaboration id="Collab_1">
+    <participant id="P_Customer" name="Customer"/>
+    <participant id="P_Company" name="Acme Ltd" processRef="Proc_Company"/>
+    <messageFlow id="MF_Order" name="Order" sourceRef="P_Customer" targetRef="Start_Order" messageRef="Msg_Order"/>
+    <messageFlow id="MF_Reject" name="Rejection notice" sourceRef="Task_Reject" targetRef="P_Customer" messageRef="Msg_Rejection"/>
+    <messageFlow id="MF_Pay" name="Payment" sourceRef="P_Customer" targetRef="Task_AwaitPay" messageRef="Msg_Payment"/>
+    <messageFlow id="MF_Remind" name="Payment reminder" sourceRef="Task_Remind" targetRef="P_Customer" messageRef="Msg_Reminder"/>
+    <messageFlow id="MF_Ship" name="Shipment" sourceRef="End_Shipped" targetRef="P_Customer" messageRef="Msg_Shipment"/>
+  </collaboration>
+  <process id="Proc_Company" name="Fulfil customer order" isExecutable="false">
+    <laneSet id="LS_1">
+      <lane id="Lane_Sales" name="Sales">
+        <flowNodeRef>Start_Order</flowNodeRef>
+        <flowNodeRef>Task_Check</flowNodeRef>
+        <flowNodeRef>GW_Valid</flowNodeRef>
+        <flowNodeRef>Task_Reject</flowNodeRef>
+        <flowNodeRef>End_Rejected</flowNodeRef>
+      </lane>
+      <lane id="Lane_Wh" name="Warehouse">
+        <flowNodeRef>GW_Split</flowNodeRef>
+        <flowNodeRef>Task_Reserve</flowNodeRef>
+        <flowNodeRef>Task_Pack</flowNodeRef>
+        <flowNodeRef>GW_Join</flowNodeRef>
+        <flowNodeRef>Task_Ship</flowNodeRef>
+        <flowNodeRef>End_Shipped</flowNodeRef>
+      </lane>
+      <lane id="Lane_Fin" name="Finance">
+        <flowNodeRef>Task_Invoice</flowNodeRef>
+        <flowNodeRef>Task_AwaitPay</flowNodeRef>
+        <flowNodeRef>Task_Remind</flowNodeRef>
+        <flowNodeRef>End_Reminded</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="Start_Order" name="Order received">
+      <messageEventDefinition messageRef="Msg_Order"/>
+    </startEvent>
+    <userTask id="Task_Check" name="Check order"/>
+    <exclusiveGateway id="GW_Valid" name="Order valid?" default="SF_Yes"/>
+    <sendTask id="Task_Reject" name="Send rejection notice" messageRef="Msg_Rejection"/>
+    <endEvent id="End_Rejected" name="Order rejected"/>
+    <parallelGateway id="GW_Split"/>
+    <serviceTask id="Task_Reserve" name="Reserve stock">
+      <dataOutputAssociation id="DOA_1">
+        <targetRef>DS_ERP</targetRef>
+      </dataOutputAssociation>
+    </serviceTask>
+    <manualTask id="Task_Pack" name="Pack goods"/>
+    <serviceTask id="Task_Invoice" name="Issue invoice"/>
+    <receiveTask id="Task_AwaitPay" name="Await payment" messageRef="Msg_Payment"/>
+    <boundaryEvent id="BE_Timer" name="7 days" attachedToRef="Task_AwaitPay" cancelActivity="false">
+      <timerEventDefinition>
+        <timeDuration>P7D</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <sendTask id="Task_Remind" name="Send payment reminder" messageRef="Msg_Reminder"/>
+    <endEvent id="End_Reminded" name="Reminder sent"/>
+    <parallelGateway id="GW_Join"/>
+    <task id="Task_Ship" name="Ship order"/>
+    <endEvent id="End_Shipped" name="Order shipped">
+      <messageEventDefinition messageRef="Msg_Shipment"/>
+    </endEvent>
+    <dataObject id="DO_Order" name="Order"/>
+    <dataObjectReference id="DOR_Order" name="Order" dataObjectRef="DO_Order"/>
+    <dataStoreReference id="DS_ERP" name="ERP" dataStoreRef="DS_ERP_Def"/>
+    <sequenceFlow id="SF_1" sourceRef="Start_Order" targetRef="Task_Check"/>
+    <sequenceFlow id="SF_2" sourceRef="Task_Check" targetRef="GW_Valid"/>
+    <sequenceFlow id="SF_No" name="no" sourceRef="GW_Valid" targetRef="Task_Reject"/>
+    <sequenceFlow id="SF_Yes" name="yes" sourceRef="GW_Valid" targetRef="GW_Split"/>
+    <sequenceFlow id="SF_3" sourceRef="Task_Reject" targetRef="End_Rejected"/>
+    <sequenceFlow id="SF_4" sourceRef="GW_Split" targetRef="Task_Reserve"/>
+    <sequenceFlow id="SF_5" sourceRef="GW_Split" targetRef="Task_Invoice"/>
+    <sequenceFlow id="SF_6" sourceRef="Task_Reserve" targetRef="Task_Pack"/>
+    <sequenceFlow id="SF_7" sourceRef="Task_Invoice" targetRef="Task_AwaitPay"/>
+    <sequenceFlow id="SF_8" sourceRef="Task_Pack" targetRef="GW_Join"/>
+    <sequenceFlow id="SF_9" sourceRef="Task_AwaitPay" targetRef="GW_Join"/>
+    <sequenceFlow id="SF_10" sourceRef="GW_Join" targetRef="Task_Ship"/>
+    <sequenceFlow id="SF_11" sourceRef="Task_Ship" targetRef="End_Shipped"/>
+    <sequenceFlow id="SF_12" sourceRef="BE_Timer" targetRef="Task_Remind"/>
+    <sequenceFlow id="SF_13" sourceRef="Task_Remind" targetRef="End_Reminded"/>
+    <textAnnotation id="TA_1">
+      <text>Pack within 24 h of reservation</text>
+    </textAnnotation>
+    <association id="As_1" sourceRef="Task_Pack" targetRef="TA_1"/>
+  </process>
+</definitions>

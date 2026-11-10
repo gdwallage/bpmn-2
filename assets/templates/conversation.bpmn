@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="D5" targetNamespace="http://example.com/t4">
+  <collaboration id="Col_conv" name="Order handling conversations">
+    <participant id="A" name="Customer"/><participant id="B" name="Retailer"/><participant id="C" name="Carrier"/>
+    <conversation id="cv1" name="Order"/><subConversation id="cv2" name="Delivery"/>
+    <conversationLink id="l1" sourceRef="A" targetRef="cv1"/><conversationLink id="l2" sourceRef="cv1" targetRef="B"/>
+    <conversationLink id="l3" sourceRef="B" targetRef="cv2"/><conversationLink id="l4" sourceRef="cv2" targetRef="C"/>
+  </collaboration>
+</definitions>

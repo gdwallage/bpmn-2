@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" id="D2" targetNamespace="http://x">
+  <process id="P1" name="Unsound examples">
+    <startEvent id="s"/>
+    <task id="a" name="Prepare"/>
+    <exclusiveGateway id="x1" name="Route?" default="d_xb"/>
+    <task id="b" name="Path B"/><task id="c" name="Path C"/>
+    <parallelGateway id="j1" name="AND join of XOR split"/>
+    <task id="z" name="Finish"/>
+    <endEvent id="e"/>
+    <sequenceFlow id="d_sa" sourceRef="s" targetRef="a"/>
+    <sequenceFlow id="d_ax" sourceRef="a" targetRef="x1"/>
+    <sequenceFlow id="d_xb" name="B" sourceRef="x1" targetRef="b"/>
+    <sequenceFlow id="d_xc" name="C" sourceRef="x1" targetRef="c"><conditionExpression>c</conditionExpression></sequenceFlow>
+    <sequenceFlow id="d_bj" sourceRef="b" targetRef="j1"/>
+    <sequenceFlow id="d_cj" sourceRef="c" targetRef="j1"/>
+    <sequenceFlow id="d_jz" sourceRef="j1" targetRef="z"/>
+    <sequenceFlow id="d_ze" sourceRef="z" targetRef="e"/>
+  </process>
+  <process id="P2" name="Lack of synchronisation">
+    <startEvent id="s2"/>
+    <parallelGateway id="p2" name="Fork"/>
+    <task id="t1" name="Branch 1"/><task id="t2" name="Branch 2"/>
+    <exclusiveGateway id="m2" name="Merge"/>
+    <task id="fin" name="Finish"/>
+    <endEvent id="e2"/>
+    <sequenceFlow id="g1" sourceRef="s2" targetRef="p2"/>
+    <sequenceFlow id="g2" sourceRef="p2" targetRef="t1"/>
+    <sequenceFlow id="g3" sourceRef="p2" targetRef="t2"/>
+    <sequenceFlow id="g4" sourceRef="t1" targetRef="m2"/>
+    <sequenceFlow id="g5" sourceRef="t2" targetRef="m2"/>
+    <sequenceFlow id="g6" sourceRef="m2" targetRef="fin"/>
+    <sequenceFlow id="g7" sourceRef="fin" targetRef="e2"/>
+  </process>
+  <process id="P3" name="Good loop with OR">
+    <startEvent id="s3"/>
+    <task id="w" name="Work"/>
+    <exclusiveGateway id="rev" name="OK?" default="r_back"/>
+    <inclusiveGateway id="or1" name="Which checks?"/>
+    <task id="ca" name="Check A"/><task id="cb" name="Check B"/>
+    <inclusiveGateway id="or2" name="Checks done"/>
+    <task id="arch" name="Archive"/>
+    <endEvent id="e3"/>
+    <sequenceFlow id="r_s" sourceRef="s3" targetRef="w"/>
+    <sequenceFlow id="r_w" sourceRef="w" targetRef="or1"/>
+    <sequenceFlow id="r_oa" name="A needed" sourceRef="or1" targetRef="ca"><conditionExpression>a</conditionExpression></sequenceFlow>
+    <sequenceFlow id="r_ob" name="B needed" sourceRef="or1" targetRef="cb"><conditionExpression>b</conditionExpression></sequenceFlow>
+    <sequenceFlow id="r_ca" sourceRef="ca" targetRef="or2"/>
+    <sequenceFlow id="r_cb" sourceRef="cb" targetRef="or2"/>
+    <sequenceFlow id="r_o2" sourceRef="or2" targetRef="rev"/>
+    <sequenceFlow id="r_ok" name="yes" sourceRef="rev" targetRef="arch"><conditionExpression>ok</conditionExpression></sequenceFlow>
+    <sequenceFlow id="r_back" name="no" sourceRef="rev" targetRef="w"/>
+    <sequenceFlow id="r_ae" sourceRef="arch" targetRef="e3"/>
+  </process>
+</definitions>
